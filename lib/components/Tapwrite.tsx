@@ -55,7 +55,7 @@ export const Editor = ({
   isTextInput,
   editorClass,
   deleteEditorAttachments,
-  disablePasteAndDnd
+  disablePasteAndDnd,
 }: NotionLikeProps) => {
   const initialEditorContent = placeholder ?? 'Type "/" for commands';
 
@@ -67,37 +67,35 @@ export const Editor = ({
         class: editorClass,
       },
 
-      handlePaste(view, event) {
+      handlePaste(_view, event) {
         if (disablePasteAndDnd) {
-          const pastedHtml = event.clipboardData?.getData('text/html')
+          const pastedHtml = event.clipboardData?.getData("text/html");
           if (pastedHtml) {
             // Parse the HTML content
             const parser = new DOMParser();
-            const doc = parser.parseFromString(pastedHtml, 'text/html');
+            const doc = parser.parseFromString(pastedHtml, "text/html");
 
             // Check for the presence of an <img> tag
-            const imgTag = doc.querySelector('img');
+            const imgTag = doc.querySelector("img");
 
             if (imgTag) {
-              return true
+              return true;
               // You can now handle the image as needed
             }
           }
         }
-        const clipboardItems = event?.clipboardData?.items
+        const clipboardItems = event?.clipboardData?.items;
         if (clipboardItems) {
           for (let i = 0; i < clipboardItems.length; i++) {
-            if (clipboardItems[i].type.indexOf('image') !== -1) {
-              event.preventDefault() // Stop image from being pasted
-              return true // Prevent the paste event for images
+            if (clipboardItems[i].type.indexOf("image") !== -1) {
+              event.preventDefault(); // Stop image from being pasted
+              return true; // Prevent the paste event for images
             }
           }
         }
 
-        return false
+        return false;
       },
-
-
     },
 
     extensions: [
@@ -176,7 +174,7 @@ export const Editor = ({
           return url;
         },
         deleteImage: deleteEditorAttachments && deleteEditorAttachments,
-        disablePaste: disablePasteAndDnd
+        disablePaste: disablePasteAndDnd,
       }),
       Table.configure({
         resizable: true,
