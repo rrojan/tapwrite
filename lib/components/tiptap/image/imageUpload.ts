@@ -13,6 +13,7 @@ interface UploadImageOptions {
   HTMLAttributes: Record<string, any>
   uploadFn: ((file: File) => Promise<string | undefined>) | null
   deleteImage?: (id: string) => Promise<void>
+  disablePaste?: boolean
 }
 export const UploadImage = Node.create<UploadImageOptions>({
   name: 'uploadImage',
@@ -27,6 +28,7 @@ export const UploadImage = Node.create<UploadImageOptions>({
       HTMLAttributes: {},
       uploadFn: null,
       deleteImage: undefined,
+      disablePaste: false
     }
   },
   inline() {
@@ -113,28 +115,28 @@ export const UploadImage = Node.create<UploadImageOptions>({
       },
       deleteCurrentNode:
         () =>
-        ({ state, dispatch }) => {
-          const { selection } = state
-          const node = state.doc.nodeAt(selection.from)
-          if (node && node.type.name === this.name) {
-            const imageUrl = node.attrs.src
-            dispatch &&
-              dispatch(
-                state.tr.replaceWith(
-                  selection.from,
-                  selection.to,
-                  state.schema.nodes.paragraph.create()
+          ({ state, dispatch }) => {
+            const { selection } = state
+            const node = state.doc.nodeAt(selection.from)
+            if (node && node.type.name === this.name) {
+              const imageUrl = node.attrs.src
+              dispatch &&
+                dispatch(
+                  state.tr.replaceWith(
+                    selection.from,
+                    selection.to,
+                    state.schema.nodes.paragraph.create()
+                  )
                 )
-              )
 
-            if (deleteImage) {
-              deleteImage(imageUrl)
+              if (deleteImage) {
+                deleteImage(imageUrl)
+              }
+
+              return true
             }
-
-            return true
-          }
-          return false
-        },
+            return false
+          },
     }
   },
   addInputRules() {
@@ -156,6 +158,7 @@ export const UploadImage = Node.create<UploadImageOptions>({
         props: {
           handleDOMEvents: {
             drop: (view, event) => {
+              if (this.options.disablePaste) return
               const hasFiles =
                 event.dataTransfer &&
                 event.dataTransfer.files &&
@@ -302,20 +305,20 @@ function startImageUpload(
         // Insert the uploaded image at the placeholder's position
         !isPaste
           ? view.dispatch(
-              view.state.tr
-                .replaceWith(
-                  pos,
-                  pos + 1,
-                  schema.nodes.uploadImage.create({ src: url }),
-                  paragraphNode
-                )
-                .setMeta(placeholderPlugin, { remove: { id } })
-            )
+            view.state.tr
+              .replaceWith(
+                pos,
+                pos + 1,
+                schema.nodes.uploadImage.create({ src: url }),
+                paragraphNode
+              )
+              .setMeta(placeholderPlugin, { remove: { id } })
+          )
           : view.dispatch(
-              view.state.tr
-                .insert(pos, schema.nodes.uploadImage.create({ src: url }))
-                .setMeta(placeholderPlugin, { remove: { id } })
-            )
+            view.state.tr
+              .insert(pos, schema.nodes.uploadImage.create({ src: url }))
+              .setMeta(placeholderPlugin, { remove: { id } })
+          )
       }
     },
     () => {
