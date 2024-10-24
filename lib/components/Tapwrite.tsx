@@ -79,7 +79,6 @@ export const Editor = ({
             const imgTag = doc.querySelector('img');
 
             if (imgTag) {
-              alert("img tag gound")
               return true
               // You can now handle the image as needed
             }
@@ -177,6 +176,7 @@ export const Editor = ({
           return url;
         },
         deleteImage: deleteEditorAttachments && deleteEditorAttachments,
+        disablePaste: disablePasteAndDnd
       }),
       Table.configure({
         resizable: true,
